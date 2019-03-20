@@ -12,6 +12,7 @@
 #include "map"
 #include "string"
 #include "fstream"
+#include "QTextCodec"
 /*
 #include <QtCharts/QChartView>
 #include <QtCharts/QBarSeries>
@@ -75,10 +76,11 @@ void MainWindow::on_importButton_clicked()
     vector<Student> collideStudent;
     vector<Student> repeat;
     vector<Student> import=calculate(freshData, studentData, collideFresh, collideStudent, repeat);
+    //avoid writting wrong data to the student file , use another file to test
+    QString testWriteTo("E:/Qt/Qt_source/FuShi/writeTo.csv");
+    importToCSV(testWriteTo, import);
 
-    importToCSV(studentFileName, import);
-
-
+    //show repeat and collide info
     QString fresh;
     QString student;
     for(unsigned int i=0;i<repeat.size();++i)
@@ -97,6 +99,7 @@ void MainWindow::on_importButton_clicked()
     ui->freshEdit->setText(fresh);
     ui->studentEdit->setText(student);
 
+    //show info
     QString info;
     info=info+"FreshFile:"+freshFileName+" and studentFileName:"+studentFileName+":\n";
 
@@ -194,28 +197,31 @@ vector<Student> MainWindow::calculate(vector<Student>freshData, map<QString, QSt
             newStudent.push_back(freshData[i]);
         }
     }
-    return freshData;
+    return newStudent;
 }
 
 
 void MainWindow::importToCSV(QString fileName, vector<Student>import)
 {
+
     QFile dataFile(fileName);
-    dataFile.open(QIODevice::ReadWrite);
+    dataFile.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Append);
 
     //vector<Student> dataVector;
     //dataVector.resize(1000);
-    QDataStream dataStream(&dataFile);
-    QString temp;
-    QChar* buf;
-    /*
+    //QTextStream dataStream(&dataFile);
+    QString appendData;
+
     for(unsigned int i=0;i<import.size();++i)
     {
-        temp=import[i].id+","+import[i].name+"\n";
-        temp.setRawData(buf,temp.length());
-        dataStream.writeRawData(temp.length());
+        appendData+=import[i].id+","+import[i].name+"\n";
     }
-    */
+    //write to the file from the file end
+    //dataFile.seek(dataFile.size());
+    //QTextCodec *codec = QTextCodec::codecForName("GBK");
+
+
+    dataFile.write(appendData.toUtf8());
     dataFile.close();
 
 
